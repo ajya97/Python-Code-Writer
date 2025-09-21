@@ -7,7 +7,7 @@ import re
 # Page Configuration
 # ===============================
 st.set_page_config(
-    page_title="🐍 Python Code Writer with Gemini",
+    page_title="🐍 Python Code Writer",
     page_icon="✨",
     layout="wide"
 )
