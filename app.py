@@ -16,7 +16,7 @@ st.set_page_config(
 # Gemini Configuration
 # ===============================
 def configure_gemini():
-    api_key = "AIzaSyCO68-XwfozgPHtXYsDlXB_aSKCoG-YBCg"
+    api_key = st.secrets["AI_API_KEY"]
     try:
         genai.configure(api_key=api_key)
         return genai.GenerativeModel('gemini-2.5-flash')
