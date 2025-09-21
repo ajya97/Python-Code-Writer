@@ -21,7 +21,7 @@ def configure_gemini():
         genai.configure(api_key=api_key)
         return genai.GenerativeModel('gemini-2.5-flash')
     except Exception as e:
-        st.error(f"⚠️ Error configuring Gemini: {str(e)}")
+        st.error(f"⚠️ Error configuring A.I.: {str(e)}")
         return None
 
 # ===============================
@@ -168,7 +168,7 @@ if st.session_state.explanation:
 # ===============================
 st.markdown("---")
 st.markdown(
-    "<center>⚡ Built with Streamlit & Google Gemini | @ 2025 ⚡</center>",
+    "<center>⚡ Built with Streamlit & A.I. API | @ 2025 ⚡</center>",
     unsafe_allow_html=True
 )
 
