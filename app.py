@@ -16,7 +16,7 @@ st.set_page_config(
 # Gemini Configuration
 # ===============================
 def configure_gemini():
-    api_key = st.secrets.get("GOOGLE_API_KEY")
+    api_key = "AIzaSyCO68-XwfozgPHtXYsDlXB_aSKCoG-YBCg"
     try:
         genai.configure(api_key=api_key)
         return genai.GenerativeModel('gemini-2.5-flash')
@@ -171,3 +171,4 @@ st.markdown(
     "<center>⚡ Built with Streamlit & Google Gemini | @ 2025 ⚡</center>",
     unsafe_allow_html=True
 )
+
