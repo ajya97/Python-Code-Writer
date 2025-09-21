@@ -83,7 +83,7 @@ def explain_code_hinglish(code, user_level="beginner"):
         return "⚠️ API not configured. Please check your API key."
     try:
         prompt = f"""
-        Explain this Python code in Hinglish (Hindi + English) for a {user_level} level programmer:
+        Explain this Python code in Hinglish (Hindi + English) (Not in Hindi) for a {user_level} level programmer:
         {code}
         
         Guidelines:
