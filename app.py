@@ -108,7 +108,7 @@ for key in ["json_prompt", "generated_output", "modules", "explanation"]:
 # ===============================
 # UI Layout
 # ===============================
-st.title("✨ Python Code Writer")
+st.title("✨ Python Code Writer & Explainer")
 st.caption("Generate clean, minimal Python code using AI 🚀")
 
 # Input Section
