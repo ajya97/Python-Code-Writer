@@ -109,7 +109,7 @@ for key in ["json_prompt", "generated_output", "modules", "explanation"]:
 # UI Layout
 # ===============================
 st.title("✨ Python Code Writer & Explainer")
-st.caption("Generate clean, minimal Python code using AI 🚀")
+st.caption("Generate clean, minimal Python code using AI")
 
 # Input Section
 st.markdown("### 📝 Describe Your Task")
@@ -150,7 +150,6 @@ if st.session_state.generated_output:
     st.markdown("### 🧩 Generated Code")
     st.code(st.session_state.generated_output, language="python")
 
-    # Explain button stays active after reruns
     if st.button("💡 Explain Code in Hinglish", use_container_width=True):
         with st.spinner("🗣️ Generating explanation in Hinglish..."):
             st.session_state.explanation = explain_code_hinglish(st.session_state.generated_output)
