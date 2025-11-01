@@ -2,21 +2,37 @@ import streamlit as st
 import google.generativeai as genai
 import json
 import re
+from openai import OpenAI
 
-# ===============================
-# Page Configuration
-# ===============================
 st.set_page_config(
     page_title="🐍 Python Code Writer",
     page_icon="✨",
     layout="wide"
 )
 
-# ===============================
-# Gemini Configuration
-# ===============================
+client = OpenAI(
+  base_url="https://openrouter.ai/api/v1",
+  api_key=st.secrets["OPENAI_API_KEY"],
+)
+
+def openai_model(promt):
+    completion = client.chat.completions.create(
+      extra_headers={
+        "HTTP-Referer": "<YOUR_SITE_URL>", # Optional. Site URL for rankings on openrouter.ai.
+        "X-Title": "<YOUR_SITE_NAME>", # Optional. Site title for rankings on openrouter.ai.
+      },
+      model="openai/gpt-4o",
+      messages=[
+        {
+          "role": "user",
+          "content": f"{promt}"
+        }
+      ]
+    )
+    return completion.choices[0].message.content
+
 def configure_gemini():
-    api_key = st.secrets["AI_API_KEY"]
+    api_key = st.secrets["GEMINI_API_KEY"]
     try:
         genai.configure(api_key=api_key)
         return genai.GenerativeModel('gemini-2.5-flash')
@@ -24,9 +40,6 @@ def configure_gemini():
         st.error(f"⚠️ Error configuring A.I.: {str(e)}")
         return None
 
-# ===============================
-# Helper Functions
-# ===============================
 def create_json_prompt(user_prompt):
     return json.dumps({
         "request": "generate_python_code",
@@ -62,9 +75,7 @@ def generate_code(json_prompt):
     model = configure_gemini()
     if not model:
         return "⚠️ API not configured. Please check your API key."
-    try:
-        response = model.generate_content(
-            f"""As an expert Python developer, analyze this JSON request and generate clean, minimal Python code: 
+    prompt = f"""As an expert Python developer, analyze this JSON request and generate clean, minimal Python code: 
             {json_prompt}
             
             Requirements:
@@ -72,10 +83,16 @@ def generate_code(json_prompt):
             2. Concise and functional
             3. Efficient, modern Python
             4. Wrap response inside ```python"""
+    try:
+        response = model.generate_content(
+            f"{prompt}"
         )
         return response.text
     except Exception as e:
-        return f"⚠️ Error generating code: {str(e)}"
+        try:
+            return openai_model(prompt)
+        except Exception as o:
+            return f"⚠️ Error generating code by gemini: {str(e)}\n⚠️ Error generating code by openai: {str(o)}"
 
 def explain_code_hinglish(code, user_level="beginner"):
     model = configure_gemini()
@@ -96,18 +113,15 @@ def explain_code_hinglish(code, user_level="beginner"):
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        return f"⚠️ Error generating explanation: {str(e)}"
+        try:
+            return openai_model(prompt)
+        except:
+            return f"⚠️ Error generating explanation: {str(e)}"
 
-# ===============================
-# Session State Defaults
-# ===============================
 for key in ["json_prompt", "generated_output", "modules", "explanation"]:
     if key not in st.session_state:
         st.session_state[key] = ""
 
-# ===============================
-# UI Layout
-# ===============================
 st.title("✨ Python Code Writer & Explainer")
 st.caption("Generate clean, minimal Python code using AI")
 
@@ -121,9 +135,6 @@ user_prompt = st.text_area(
 
 generate_btn = st.button("⚡ Generate Code", use_container_width=True, type="primary")
 
-# ===============================
-# Handle Generate Button
-# ===============================
 if generate_btn and user_prompt:
     with st.spinner("🔮 Generating clean, minimal code..."):
         st.session_state.json_prompt = create_json_prompt(user_prompt)
@@ -133,9 +144,6 @@ if generate_btn and user_prompt:
         st.session_state.modules = extract_modules_from_code(st.session_state.generated_output)
         st.session_state.explanation = ""  # reset explanation when generating new code
 
-# ===============================
-# Show Results (Persist After Rerun)
-# ===============================
 if st.session_state.generated_output:
     st.markdown("## 🎯 Results")
 
@@ -154,17 +162,11 @@ if st.session_state.generated_output:
         with st.spinner("🗣️ Generating explanation in Hinglish..."):
             st.session_state.explanation = explain_code_hinglish(st.session_state.generated_output)
 
-# ===============================
-# Show Explanation (Persist)
-# ===============================
 if st.session_state.explanation:
     st.success("✅ Explanation Ready!")
     st.markdown("### 🔍 Code Explanation (Hinglish)")
     st.write(st.session_state.explanation)
 
-# ===============================
-# Footer
-# ===============================
 st.markdown("---")
 st.markdown(
     "<center>⚡ Built with Streamlit & A.I. API | @ 2025 ⚡</center>",
