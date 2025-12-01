@@ -5,26 +5,22 @@ import re
 from openai import OpenAI
 
 st.set_page_config(
-    page_title="🐍 Python Code Writer",
+    page_title="🐍 Code Writer",
     page_icon="✨",
     layout="wide"
 )
 
 client = OpenAI(
   base_url="https://openrouter.ai/api/v1",
-  api_key=st.secrets["OPENAI_API_KEY"],
+  api_key= "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"
 )
 
 def openai_model(promt):
     completion = client.chat.completions.create(
-      extra_headers={
-        "HTTP-Referer": "<YOUR_SITE_URL>", # Optional. Site URL for rankings on openrouter.ai.
-        "X-Title": "<YOUR_SITE_NAME>", # Optional. Site title for rankings on openrouter.ai.
-      },
-      model="openai/gpt-4o",
+      model="x-ai/grok-4.1-fast:free",
       messages=[
         {
-          "role": "user",
+          "role": "coder",
           "content": f"{promt}"
         }
       ]
@@ -32,7 +28,7 @@ def openai_model(promt):
     return completion.choices[0].message.content
 
 def configure_gemini():
-    api_key = st.secrets["GEMINI_API_KEY"]
+    api_key = "AIzaSyBdpkEX39x9Kxnubdpnaqi58M7FaD4Ty58"
     try:
         genai.configure(api_key=api_key)
         return genai.GenerativeModel('gemini-2.5-flash')
@@ -42,10 +38,10 @@ def configure_gemini():
 
 def create_json_prompt(user_prompt):
     return json.dumps({
-        "request": "generate_python_code",
+        "request": f"generate_{st.session_state.language}_code",
         "prompt": user_prompt,
         "requirements": {
-            "language": "python",
+            "language": f"{st.session_state.language}",
             "code_style": "minimal",
             "include_comments": False,
             "include_docs": False,
@@ -54,7 +50,7 @@ def create_json_prompt(user_prompt):
     }, indent=2)
 
 def extract_code_from_response(response_text):
-    code_blocks = re.findall(r'```(?:python)?\s*(.*?)\s*```', response_text, re.DOTALL)
+    code_blocks = re.findall(rf'```(?:{st.session_state.language})?\s*(.*?)\s*```', response_text, re.DOTALL)
     if code_blocks:
         return code_blocks[0]
     code_blocks = re.findall(r'"""(.*?)"""', response_text, re.DOTALL)
@@ -75,14 +71,14 @@ def generate_code(json_prompt):
     model = configure_gemini()
     if not model:
         return "⚠️ API not configured. Please check your API key."
-    prompt = f"""As an expert Python developer, analyze this JSON request and generate clean, minimal Python code: 
+    prompt = f"""As an expert {st.session_state.language} developer, analyze this JSON request and generate clean, minimal {st.session_state.language} code: 
             {json_prompt}
             
             Requirements:
             1. Essential code only (no comments/docs)
             2. Concise and functional
-            3. Efficient, modern Python
-            4. Wrap response inside ```python"""
+            3. Efficient, modern {st.session_state.language}
+            4. Wrap response inside """
     try:
         response = model.generate_content(
             f"{prompt}"
@@ -92,7 +88,7 @@ def generate_code(json_prompt):
         try:
             return openai_model(prompt)
         except Exception as o:
-            return f"⚠️ Error generating code by gemini: {str(e)}\n⚠️ Error generating code by openai: {str(o)}"
+            return f"⚠️ Error generating code by gemini: {str(e)[:50]}\n⚠️ Error generating code by openai: {str(o)[:50]}"
 
 def explain_code_hinglish(code, user_level="beginner"):
     model = configure_gemini()
@@ -100,7 +96,7 @@ def explain_code_hinglish(code, user_level="beginner"):
         return "⚠️ API not configured. Please check your API key."
     try:
         prompt = f"""
-        Explain this Python code in Hinglish (Hindi + English) (Not in Hindi) for a {user_level} level programmer:
+        Explain this {st.session_state.language} code in Hinglish (Hindi + English) (Not in Hindi) for a {user_level} level programmer:
         {code}
         
         Guidelines:
@@ -118,18 +114,19 @@ def explain_code_hinglish(code, user_level="beginner"):
         except:
             return f"⚠️ Error generating explanation: {str(e)}"
 
-for key in ["json_prompt", "generated_output", "modules", "explanation"]:
+for key in ["json_prompt", "generated_output", "modules", "explanation","language"]:
     if key not in st.session_state:
         st.session_state[key] = ""
 
-st.title("✨ Python Code Writer & Explainer")
-st.caption("Generate clean, minimal Python code using AI")
+st.title("✨ Code Writer & Explainer")
+st.caption("Generate clean, minimal code using AI")
+st.session_state.language = st.selectbox("Select Programming Language:",['Python','Java','C++','C'])
 
 # Input Section
 st.markdown("### 📝 Describe Your Task")
 user_prompt = st.text_area(
     "Enter your coding task below 👇",
-    placeholder="Example: Create a neural network for image classification using TensorFlow",
+    placeholder="Example: Create a neural network for image classification",
     height=100
 )
 
@@ -142,7 +139,7 @@ if generate_btn and user_prompt:
         extracted_code = extract_code_from_response(raw_output)
         st.session_state.generated_output = clean_code(extracted_code)
         st.session_state.modules = extract_modules_from_code(st.session_state.generated_output)
-        st.session_state.explanation = ""  # reset explanation when generating new code
+        st.session_state.explanation = ""  
 
 if st.session_state.generated_output:
     st.markdown("## 🎯 Results")
@@ -156,7 +153,7 @@ if st.session_state.generated_output:
         st.code(f"pip install {' '.join(st.session_state.modules)}", language="bash")
 
     st.markdown("### 🧩 Generated Code")
-    st.code(st.session_state.generated_output, language="python")
+    st.code('#'+st.session_state.generated_output, language="python")
 
     if st.button("💡 Explain Code in Hinglish", use_container_width=True):
         with st.spinner("🗣️ Generating explanation in Hinglish..."):
