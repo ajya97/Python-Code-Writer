@@ -12,7 +12,7 @@ st.set_page_config(
 
 client = OpenAI(
   base_url="https://openrouter.ai/api/v1",
-  api_key= "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"
+  api_key= st.secrets["OPENAI_API_KEY"]
 )
 
 def openai_model(promt):
@@ -28,7 +28,7 @@ def openai_model(promt):
     return completion.choices[0].message.content
 
 def configure_gemini():
-    api_key = "AIzaSyBdpkEX39x9Kxnubdpnaqi58M7FaD4Ty58"
+    api_key = st.secrets["GEMINI_API_KEY"]
     try:
         genai.configure(api_key=api_key)
         return genai.GenerativeModel('gemini-2.5-flash')
