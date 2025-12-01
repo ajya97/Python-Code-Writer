@@ -5,7 +5,7 @@ import re
 from openai import OpenAI
 
 st.set_page_config(
-    page_title="🐍 Code Writer",
+    page_title="Code Writer",
     page_icon="✨",
     layout="wide"
 )
