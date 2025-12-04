@@ -89,7 +89,7 @@ def generate_code(json_prompt):
         try:
             return openai_model(prompt)
         except Exception as o:
-            return f"⚠️ Error generating code by gemini: {str(e)[:50]}\n⚠️ Error generating code by openai: {str(o)[:50]}"
+            return f"⚠️ Error generating code by gemini: {str(e)[:50]}\n⚠️ Error generating code by openai: {str(o)[:]}"
 
 def explain_code_hinglish(code, user_level="beginner"):
     model = configure_gemini()
