@@ -11,19 +11,20 @@ st.set_page_config(
 )
 
 client = OpenAI(
-  base_url="https://openrouter.ai/api/v1",
+  base_url="https://api.perplexity.ai",
   api_key= st.secrets["OPENAI_API_KEY"]
 )
 
 def openai_model(promt):
     completion = client.chat.completions.create(
-      model="x-ai/grok-4.1-fast:free",
+      model="sonar",
       messages=[
         {
           "role": "coder",
           "content": f"{promt}"
         }
-      ]
+      ],
+      max_tokens=10
     )
     return completion.choices[0].message.content
 
