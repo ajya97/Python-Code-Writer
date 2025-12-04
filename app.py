@@ -17,14 +17,14 @@ client = OpenAI(
 
 def openai_model(promt):
     completion = client.chat.completions.create(
-      model="x-ai/grok-4.1-fast:free",
+      model="sonar",
       messages=[
         {
           "role": "user",
           "content": f"{promt}"
         }
       ],
-      max_tokens=10
+      max_tokens=1000
     )
     return completion.choices[0].message.content
 
