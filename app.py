@@ -24,7 +24,7 @@ def openai_model(promt):
           "content": f"{promt}"
         }
       ],
-      max_tokens=1000
+      max_tokens=500
     )
     return completion.choices[0].message.content
 
